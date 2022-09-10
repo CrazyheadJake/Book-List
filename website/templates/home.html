@@ -1,0 +1,434 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %}
+
+{% block content %}
+<h1 align="center">Book Log</h1>
+<div class="container-fluid" align="date">
+    <div class="row">
+        {% for entry in user.entries %}
+        <div class="card border-info mr-3 mb-3" style="width: 14rem;">
+            <img class="card-img-top" src="../static/covers/{{entry.id}}.jpg" alt="Book Cover" onError="this.onerror=null;this.src='../static/covers/default_cover.jpg';">
+
+            <div class="card-body p-2" align="center">
+                <h5 class="card-title mb-1">{{ entry.title }}</h5>
+                {% if entry.is_series %}
+                <h5 class="card-subtitle mb-1 text-muted">by {{ entry.author }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">({{ entry.series + " #"}}{{ ('%f' % entry.num_in_series).rstrip('0').rstrip('.') }})</h6>
+                {% else %}
+                <h5 class="card-subtitle mb-2 text-muted">by {{ entry.author }}</h5>
+                {% endif %}
+
+                <h5 class="card-subtitle mb-2 text-muted">{{ format(entry.date) }}</h5>
+
+                {% if entry.review %}
+                <p class="card-text" align="left">{{ entry.review[:80] }}...</p>
+                {% endif %}
+                <div class="progress">
+                    <div class="progress-bar" style="width: {{entry.rating}}%" role="progressbar">{{entry.rating}}/100</div>
+                </div>
+
+                {% if entry.review %}
+                <button type="button" class="btn btn-info mt-3" data-toggle="modal" data-target="#editEntry{{entry.id}}">Edit</button>
+                <button type="button" class="btn btn-info mt-3" data-toggle="modal" data-target="#{{entry.id}}">Read Full Review</button>
+                {% else %}
+                <button type="button" class="btn btn-info mt-3" data-toggle="modal" data-target="#editEntry{{entry.id}}">Edit</button>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="modal fade" id="{{entry.id}}" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body" align="left">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h5 class="modal-title mb-1">{{ entry.title }}</h5>
+                    {% if entry.is_series %}
+                    <h5 class="modal-subtitle mb-1 text-muted">by {{ entry.author }}</h5>
+                    <h6 class="modal-subtitle mb-3 text-muted">({{ entry.series + " #"}}{{ entry.num_in_series }})</h6>
+                    {% else %}
+                    <h5 class="modal-subtitle mb-3 text-muted">by {{ entry.author }}</h5>
+                    {% endif %}
+                    <br/>
+                    {{entry.review}}
+
+                </div>
+
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="editEntry{{entry.id}}" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Book Entry</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="editTitle">Title</label>
+                        <span style="color:#ff0000">*</span>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="editTitle"
+                            name="editTitle"
+                            placeholder="Enter title"
+                            value="{{entry.title}}"
+                            required="required"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="editAuthor">Author</label>
+                        <span style="color:#ff0000">*</span>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="editAuthor"
+                            name="editAuthor"
+                            placeholder="Enter full author name"
+                            required="required"
+                            value="{{entry.author}}"
+                        />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-9">
+                            <label for="editSeries">Series</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="editSeries"
+                                name="editSeries"
+                                placeholder="Enter series name if applicable"
+                                value="{{entry.series}}"
+                            />
+                        </div>
+                        <div class="form-group col-3">
+                            <label for="editSeriesNumber">Number</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="editSeriesNumber"
+                                name="editSeriesNumber"
+                                value="{{(entry.is_series * str(('%f' % entry.num_in_series).rstrip('0').rstrip('.')))}}"
+                            />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-3">
+                            <label for="editRating" >Rating</label>
+                            <span style="color:#ff0000">*</span>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="editRating"
+                                name="editRating"
+                                placeholder="0-100"
+                                required="required"
+                                value="{{entry.rating}}"
+                            />
+                        </div>
+                        <div class="form-group col">
+                            <label for="editGenre">Genre</label>
+                            <span style="color:#ff0000">*</span>
+                            <select id="editGenre" name="editGenre" class="form-control" required="required">
+                                <option selected>{{entry.genre}}</option>
+                                <option>Sci-fi</option>
+                                <option>Fantasy</option>
+                                <option>High Fantasy</option>
+                                <option>Urban Fantasy</option>
+                                <option>Dark Fantasy</option>
+                                <option>Post-apocalyptic</option>
+                                <option>Romance</option>
+                                <option>Dystopian</option>
+                                <option>Nonfiction</option>
+                                <option>Realistic Fiction</option>
+                                <option>Zombie</option>
+                                <option>Super Hero</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="editMonth">Month</label>
+                            <span style="color:#ff0000">*</span>
+                            <select id="editMonth" name="editMonth" class="form-control" required="required">
+                                <option value="{{entry.date.month}}">{{entry.date.strftime("%B")}}</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col">
+                            <label for="editDay">Day</label>
+                            <span style="color:#ff0000">*</span>
+                            <input type="text"
+                                    class="form-control"
+                                    id="editDay"
+                                    name="editDay"
+                                    required="required"
+                                    value="{{entry.date.day}}"
+                                />
+                        </div>
+
+                        <div class="form-group col">
+                            <label for="editYear">Year</label>
+                            <span style="color:#ff0000">*</span>
+                            <input type="text"
+                                   class="form-control"
+                                   id="editYear"
+                                   name="editYear"
+                                   required="required"
+                                   value="{{entry.date.year}}"
+                                />
+                        </div>
+
+                    </div>
+                    <small id="editDateHelper" class="form-text text-muted">Please enter the date that you finished reading the book</small>
+                    <br/>
+                    <div class="form-group">
+                        <label for="editReview">Review</label>
+                        <textarea class="form-control" name="editReview" id="editReview" rows="3">{{entry.review}}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <input type="text"
+                               class="form-control"
+                               id="entryId"
+                               name="entryId"
+                               required="required"
+                               value="{{entry.id}}"
+                               hidden
+                            />
+                    </div>
+                    <br/>
+                    <div align="right">
+                        <button type="button" class="btn btn-danger mr-5" onClick="deleteEntry({{ entry.id }})">Delete Entry</button>
+                        <button type="button" class="btn btn-secondary ml-5" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Edits</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+<br/>
+<br/>
+
+<div class="fixed-bottom">
+    <div class="container-fluid bg-dark" align="center">
+        <div class="row">
+            <div class="col-4"></div>
+            <div class="col-4" align="center">
+                <button type="button" class="btn btn-primary my-1 mr-5 btn-sm" data-toggle="modal" data-target="#bookEntry">
+                Add a new book entry
+                </button>
+            </div>
+            <div class="col-4" align="right">
+                <button type="button" class="btn btn-secondary my-1 ml-5 btn-sm" data-toggle="modal" data-target="#singleLineEntry">
+                Single line book entry
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="bookEntry" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New Book Entry</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="POST">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <span style="color:#ff0000">*</span>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="title"
+                    name="title"
+                    placeholder="Enter title"
+                    required="required"
+                />
+            </div>
+            <div class="form-group">
+                <label for="author">Author</label>
+                <span style="color:#ff0000">*</span>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="author"
+                    name="author"
+                    placeholder="Enter full author name"
+                    required="required"
+                />
+            </div>
+            <div class="form-row">
+                <div class="form-group col-9">
+                    <label for="series">Series</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="series"
+                        name="series"
+                        placeholder="Enter series name if applicable"
+                    />
+                </div>
+                <div class="form-group col-3">
+                    <label for="seriesNumber">Number</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="seriesNumber"
+                        name="seriesNumber"
+                    />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-3">
+                    <label for="rating" >Rating</label>
+                    <span style="color:#ff0000">*</span>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="rating"
+                        name="rating"
+                        placeholder="0-100"
+                        required="required"
+                    />
+                </div>
+                <div class="form-group col">
+                    <label for="genre">Genre</label>
+                    <span style="color:#ff0000">*</span>
+                    <select id="genre" name="genre" class="form-control" required="required">
+                        <option>Sci-fi</option>
+                        <option>Fantasy</option>
+                        <option>High Fantasy</option>
+                        <option>Urban Fantasy</option>
+                        <option>Dark Fantasy</option>
+                        <option>Post-apocalyptic</option>
+                        <option>Romance</option>
+                        <option>Dystopian</option>
+                        <option>Nonfiction</option>
+                        <option>Realistic Fiction</option>
+                        <option>Zombie</option>
+                        <option>Super Hero</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col">
+                    <label for="month">Month</label>
+                    <span style="color:#ff0000">*</span>
+                    <select id="month" name="month" class="form-control" required="required">
+                        <option selected value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+
+                <div class="form-group col">
+                    <label for="day">Day</label>
+                    <span style="color:#ff0000">*</span>
+                    <input type="text"
+                            class="form-control"
+                            id="day"
+                            name="day"
+                            required="required"
+                        />
+                </div>
+
+                <div class="form-group col">
+                    <label for="year">Year</label>
+                    <span style="color:#ff0000">*</span>
+                    <input type="text"
+                           class="form-control"
+                           id="year"
+                           name="year"
+                           required="required"
+                        />
+                </div>
+
+            </div>
+            <small id="dateHelper" class="form-text text-muted">Please enter the date that you finished reading the book</small>
+            <br/>
+            <div class="form-group">
+                <label for="review">Review</label>
+                <textarea class="form-control" name="review" id="review" rows="3"></textarea>
+            </div>
+            <br/>
+            <div align="right">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add Entry</button>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
+</div>
+
+<div class="modal fade" id="singleLineEntry" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New Book Entry</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="POST">
+            <div class="form-group">
+                <label for="lineEntries">Single Line Entries</label>
+                <span style="color:#ff0000">*</span>
+                <textarea class="form-control" name="lineEntries" id="lineEntries" rows="12" required></textarea>
+                <small id="lineEntryHelper1" class="form-text text-muted">Please enter each entry on a single line in the form:</small>
+                <small id="lineEntryHelper2" class="form-text text-muted">Rating Title (Series name #number in series) by Author (Date Finished)</small>
+                <small id="lineEntryHelper3" class="form-text text-muted">Rating should be on a 0-100 scale. For example, some valid entries would be:</small>
+                <small id="lineEntryHelper4" class="form-text text-muted">92 The Well of Ascension (Mistborn #2) by Brandon Sanderson (2/23/21)</small>
+                <small id="lineEntryHelper5" class="form-text text-muted">95 The Original by Brandon Sanderson and Mary Robinette Kowal (3/16/21)</small>
+                <small id="lineEntryHelper6" class="form-text text-muted">88 To Sleep in A Sea of Stars by Christopher Paolini (10/4/20)</small>
+
+            </div>
+            <div align="right">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add Entry</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
