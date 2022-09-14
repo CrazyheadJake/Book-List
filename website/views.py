@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, flash, request, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import BookEntry
-from . import db
+from .mongo_models import BookEntry
+from . import mongo_db as db
 import json
 import datetime
 from .webscraper import get_cover, sort_entries, format
+from .__init__ import create_app
 
 views = Blueprint("views", __name__)
 
@@ -69,12 +70,13 @@ def home():
                                       date=date,
                                       rating=rating,
                                       review=review,
+                                      cover=get_cover(title, author),
                                       genre=genre,
+                                      is_reread=False,
                                       user_id=current_user.id)
-                db.session.add(new_entry)
-                db.session.commit()
-                get_cover(new_entry)
-                new_entry.cover = str(new_entry.id) + ".jpg"
+                new_entry.save()
+                append_entry(new_entry)
+                # new_entry.cover = str(new_entry.id) + ".jpg"
                 print(f"{i+1}/{total} books added")
 
             flash("Book has been successfully added to the log", category="success")
@@ -118,13 +120,12 @@ def home():
                                   date=date,
                                   rating=rating,
                                   review=review,
+                                  cover=get_cover(title, author),
                                   genre=genre,
+                                  is_reread=False,
                                   user_id=current_user.id)
-            db.session.add(new_entry)
-            db.session.commit()
-
-            get_cover(new_entry)
-            new_entry.cover = str(new_entry.id) + ".jpg"
+            new_entry.save()
+            append_entry(new_entry)
 
             flash("Book has been successfully added to the log", category="success")
             return redirect(url_for("views.home"))
@@ -174,7 +175,7 @@ def home():
                     entry.num_in_series = num_in_series
                     entry.is_series = bool(series)
                     # print(entry.is_series)
-                    db.session.commit()
+                    entry.save()
                     print("Database updated")
             return redirect(url_for("views.home"))
 
@@ -183,14 +184,18 @@ def home():
     return render_template("home.html", user=current_user, str=str, rstrip="".rstrip, format=format)
 
 
+def append_entry(entry):
+    current_user.entries.append(entry)
+    current_user.save()
+
+
 @views.route("/delete-entry", methods=["POST"])
 def delete_entry():
     data = json.loads(request.data)
     entry_id = data["entryId"]
-    entry = BookEntry.query.get(entry_id)
+    entry = BookEntry.objects(id=entry_id).first()
     if entry:
         if entry.user_id == current_user.id:
-            db.session.delete(entry)
-            db.session.commit()
+            entry.delete()
             flash("Successfully deleted the book entry: " + entry.title + " by " + entry.author)
             return jsonify({})

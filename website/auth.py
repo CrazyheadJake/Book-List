@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User
+from .mongo_models import User
 from werkzeug.security import generate_password_hash, check_password_hash
-from . import db
+from . import mongo_db as db
 from flask_login import login_user, login_required, logout_user, current_user
 
 auth = Blueprint("auth", __name__)
@@ -13,7 +13,7 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        user = User.query.filter_by(email=email).first()
+        user = User.objects(email=email).first()
         if user:
             if check_password_hash(user.password, password):
                 flash("Logged in successfully!", category="success")
@@ -43,7 +43,8 @@ def sign_up():
         password1 = request.form.get("password1")
         password2 = request.form.get("password2")
 
-        user = User.query.filter_by(email=email).first()
+        # user = User.query.filter_by(email=email).first()
+        user = User.objects(email=email).first()
         if user:
             flash("Email already exists.", category="error")
         elif len(email) < 4:
@@ -57,8 +58,8 @@ def sign_up():
         else:
             # add user to database
             new_user = User(email=email, first_name=first_name, password=generate_password_hash(password1, method="sha256"))
-            db.session.add(new_user)
-            db.session.commit()
+            new_user.save()
+            print(type(new_user.id))
             login_user(new_user, remember=True)
             flash("Account created!", category="success")
             return redirect(url_for("views.home"))
