@@ -1,11 +1,9 @@
 from flask import Blueprint, render_template, flash, request, jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from .mongo_models import BookEntry
-from . import mongo_db as db
 import json
 import datetime
 from .webscraper import get_cover, sort_entries, format
-from .__init__ import create_app
 
 views = Blueprint("views", __name__)
 
@@ -28,7 +26,7 @@ def home():
 
                 print(split_entry)
                 try:
-                    rating = int(int(split_entry[0])*100/11)
+                    rating = int(int(split_entry[0]))
                 except RuntimeError:
                     rating = 0
 
@@ -180,7 +178,7 @@ def home():
             return redirect(url_for("views.home"))
 
     current_user.entries = sorted(current_user.entries, key=sort_entries, reverse=True)
-    print(len(current_user.entries))
+    # print(len(current_user.entries))
     return render_template("home.html", user=current_user, str=str, rstrip="".rstrip, format=format)
 
 
@@ -191,11 +189,14 @@ def append_entry(entry):
 
 @views.route("/delete-entry", methods=["POST"])
 def delete_entry():
+    # print("deleting")
     data = json.loads(request.data)
     entry_id = data["entryId"]
     entry = BookEntry.objects(id=entry_id).first()
     if entry:
         if entry.user_id == current_user.id:
+            current_user.entries.remove(entry)
             entry.delete()
+            current_user.save()
             flash("Successfully deleted the book entry: " + entry.title + " by " + entry.author)
             return jsonify({})
