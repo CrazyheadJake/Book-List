@@ -162,7 +162,7 @@ def home():
             except ValueError:
                 date = datetime.date.today()
 
-            entry = BookEntry.query.get(entry_id)
+            entry = BookEntry.object(id=entry_id).first()
             if entry:
                 if entry.user_id == current_user.id:
                     entry.title = title
