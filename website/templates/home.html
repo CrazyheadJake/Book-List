@@ -6,7 +6,7 @@
     <div class="row">
         {% for entry in user.entries %}
         <div class="card border-info mr-3 mb-3" style="width: 14rem;">
-            <img class="card-img-top" src="../static/covers/{{entry.id}}.jpg" alt="Book Cover" onError="this.onerror=null;this.src='../static/covers/default_cover.jpg';">
+            <img class="card-img-top" src="{{entry.cover}}" alt="Book Cover" onError="this.onerror=null;this.src='../static/covers/default_cover.jpg';">
 
             <div class="card-body p-2" align="center">
                 <h5 class="card-title mb-1">{{ entry.title }}</h5>
