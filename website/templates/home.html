@@ -216,7 +216,7 @@
                     </div>
                     <br/>
                     <div align="right">
-                        <button type="button" class="btn btn-danger mr-5" onClick="deleteEntry({{ entry.id }})">Delete Entry</button>
+                        <button type="button" class="btn btn-danger mr-5" onClick="deleteEntry('{{ str(entry.id) }}')">Delete Entry</button>
                         <button type="button" class="btn btn-secondary ml-5" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save Edits</button>
                     </div>
