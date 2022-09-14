@@ -28,7 +28,7 @@ def home():
 
                 print(split_entry)
                 try:
-                    rating = int(int(split_entry[0]))
+                    rating = int(int(split_entry[0])*100/11)
                 except RuntimeError:
                     rating = 0
 
