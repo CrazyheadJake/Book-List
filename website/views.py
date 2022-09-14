@@ -176,7 +176,11 @@ def home():
                     entry.save()
                     print("Database updated")
             return redirect(url_for("views.home"))
-
+    for entry in current_user.entries:
+        if len(BookEntry.objects(title = entry.title)) == 2:
+            current_user.entries.remove(entry)
+            entry.delete()
+            current_user.save()
     current_user.entries = sorted(current_user.entries, key=sort_entries, reverse=True)
     # print(len(current_user.entries))
     return render_template("home.html", user=current_user, str=str, rstrip="".rstrip, format=format)
