@@ -18,6 +18,8 @@ def home():
         sorting = request.form.get("sorting")
         if sorting:
             sort_by = sorting
+            flash("Changed sorting method", category="success")
+            return redirect(url_for("views.home"))
         elif line_entries:
             entries = line_entries.split("\r\n")
             print(entries)
