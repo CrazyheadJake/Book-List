@@ -6,17 +6,6 @@ headers = {
 }
 
 
-def format(date):
-    y = date.year
-    m = date.month
-    d = date.day
-    return f"{m}/{d}/{y}"
-
-
-def sort_entries(entry):
-    return entry.date.toordinal()
-
-
 def get_cover(title, author):
     params = {
         "q": title + " by " + author,  # search query
