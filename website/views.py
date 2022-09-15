@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from .mongo_models import BookEntry
 import json
 import datetime
-from .webscraper import get_cover, sort_entries, format
+from .webscraper import get_cover
 
 views = Blueprint("views", __name__)
 
@@ -14,7 +14,11 @@ def home():
     if request.method == "POST":
         title = request.form.get("title")
         line_entries = request.form.get("lineEntries")
-        if line_entries:
+        sorting = request.form.get("sorting")
+        sort_by = "Date"
+        if sorting:
+            sort_by = sorting
+        elif line_entries:
             entries = line_entries.split("\r\n")
             print(entries)
             total = len(entries)
@@ -176,8 +180,10 @@ def home():
                     entry.save()
                     print("Database updated")
             return redirect(url_for("views.home"))
-
-    current_user.entries = sorted(current_user.entries, key=sort_entries, reverse=True)
+    if sort_by == "Date":
+        current_user.entries = sorted(current_user.entries, key=sort_entries, reverse=True)
+    elif sort_by == "Rating":
+        current_user.entries = sorted(current_user.entries, key=sort_by_rating, reverse=True)
     # print(len(current_user.entries))
     return render_template("home.html", user=current_user, str=str, rstrip="".rstrip, format=format)
 
@@ -185,6 +191,20 @@ def home():
 def append_entry(entry):
     current_user.entries.append(entry)
     current_user.save()
+    
+    
+def sort_by_rating(entry):   
+    return entry.rating
+
+def format(date):
+    y = date.year
+    m = date.month
+    d = date.day
+    return f"{m}/{d}/{y}"
+
+
+def sort_entries(entry):
+    return entry.date.toordinal()
 
 
 @views.route("/delete-entry", methods=["POST"])
