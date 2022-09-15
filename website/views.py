@@ -11,11 +11,11 @@ views = Blueprint("views", __name__)
 @views.route("/", methods=["GET", "POST"])
 @login_required
 def home():
+    sort_by = "Date"
     if request.method == "POST":
         title = request.form.get("title")
         line_entries = request.form.get("lineEntries")
         sorting = request.form.get("sorting")
-        sort_by = "Date"
         if sorting:
             sort_by = sorting
         elif line_entries:
