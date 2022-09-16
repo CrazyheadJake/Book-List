@@ -6,6 +6,17 @@ headers = {
 }
 
 
+def format(date):
+    y = date.year
+    m = date.month
+    d = date.day
+    return f"{m}/{d}/{y}"
+
+
+def sort_entries(entry):
+    return entry.date.toordinal()
+
+
 def get_cover(title, author):
     params = {
         "q": title + " by " + author,  # search query
@@ -13,7 +24,7 @@ def get_cover(title, author):
         "hl": "en",  # language of the search
         "gl": "us",  # country where search comes from
         "ijn": "0",  # page number
-        "api_key": '094198f325c21c3bb0b991bf56605ded5a698f7b24c91245825502cae03ee4f4'
+        "api_key": 'f15dd917bd2f84606caf54dc4d103d896baa0c820aa0c9b2e840d7859fb3b4b3'
     }
 
     search = GoogleSearch(params)

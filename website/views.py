@@ -11,13 +11,15 @@ views = Blueprint("views", __name__)
 @views.route("/", methods=["GET", "POST"])
 @login_required
 def home():
-    sort_by = "Date"
     if request.method == "POST":
         title = request.form.get("title")
         line_entries = request.form.get("lineEntries")
         sorting = request.form.get("sorting")
+        edit_title = request.form.get("editTitle")
         if sorting:
-            sort_by = sorting
+            print(sorting, type(sorting))
+            current_user.sorting_method = sorting
+            current_user.save()
             flash("Changed sorting method", category="success")
             return redirect(url_for("views.home"))
         elif line_entries:
@@ -46,16 +48,19 @@ def home():
 
                 else:
                     title = entry[entry.find(" ") + 1: entry.rfind("(", 0, entry.rfind("(")) - 1]
-                    series = entry[entry.rfind("(", 0, entry.rfind("(")) + 1: entry.find("#", entry.rfind("(", 0, entry.rfind("(")))]
+                    series = entry[entry.rfind("(", 0, entry.rfind("(")) + 1: entry.find("#", entry.rfind("(", 0,
+                                                                                                          entry.rfind(
+                                                                                                              "(")))]
                     try:
-                        num_in_series = float(entry[entry.find("#", entry.find(series)) + 1: entry.find(")", entry.find(series))])
+                        num_in_series = float(
+                            entry[entry.find("#", entry.find(series)) + 1: entry.find(")", entry.find(series))])
                     except RuntimeError:
                         num_in_series = 1
 
-                author = entry[entry.rfind("by") + 3 : entry.find("(", entry.rfind("by")) - 1]
+                author = entry[entry.rfind("by") + 3: entry.find("(", entry.rfind("by")) - 1]
 
-                raw_date = entry[entry.find("(", entry.find(author)) + 1 : entry.find(")", entry.find(author))]
-                year, month, day = "-1","-1","-1"
+                raw_date = entry[entry.find("(", entry.find(author)) + 1: entry.find(")", entry.find(author))]
+                year, month, day = "-1", "-1", "-1"
                 try:
                     month, day, year = raw_date.split("/")
                 except ValueError:
@@ -81,7 +86,7 @@ def home():
                 new_entry.save()
                 append_entry(new_entry)
                 # new_entry.cover = str(new_entry.id) + ".jpg"
-                print(f"{i+1}/{total} books added")
+                print(f"{i + 1}/{total} books added")
 
             flash("Book has been successfully added to the log", category="success")
             return redirect(url_for("views.home"))
@@ -134,8 +139,8 @@ def home():
             flash("Book has been successfully added to the log", category="success")
             return redirect(url_for("views.home"))
 
-        else:
-            title = request.form.get("editTitle")
+        elif edit_title:
+            title = edit_title
             author = request.form.get("editAuthor")
             series = request.form.get("editSeries")
             rating = request.form.get("editRating")
@@ -182,10 +187,8 @@ def home():
                     entry.save()
                     print("Database updated")
             return redirect(url_for("views.home"))
-    if sort_by == "Date":
-        current_user.entries = sorted(current_user.entries, key=sort_entries, reverse=True)
-    elif sort_by == "Rating":
-        current_user.entries = sorted(current_user.entries, key=sort_by_rating, reverse=True)
+
+    current_user.entries = sorted(current_user.entries, key=lambda e: sort_entries(e, current_user))
     # print(len(current_user.entries))
     return render_template("home.html", user=current_user, str=str, rstrip="".rstrip, format=format)
 
@@ -193,10 +196,7 @@ def home():
 def append_entry(entry):
     current_user.entries.append(entry)
     current_user.save()
-    
-    
-def sort_by_rating(entry):   
-    return entry.rating
+
 
 def format(date):
     y = date.year
@@ -205,8 +205,20 @@ def format(date):
     return f"{m}/{d}/{y}"
 
 
-def sort_entries(entry):
-    return entry.date.toordinal()
+def sort_entries(entry, user):
+    sorting_method = user.sorting_method
+    if sorting_method == "Date":
+        return -entry.date.toordinal()
+    elif sorting_method == "Rating":
+        return -entry.rating
+    elif sorting_method == "Author":
+        return entry.author
+    elif sorting_method == "Series":
+        return str(not entry.is_series) + entry.series + str(entry.num_in_series)
+    elif sorting_method == "Title":
+        return entry.title
+    else:
+        return entry.date.toordinal()
 
 
 @views.route("/delete-entry", methods=["POST"])

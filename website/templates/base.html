@@ -14,7 +14,15 @@
             href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
             crossorigin="anonymous"
         />
-
+        <style>
+        .fixed-bottom {
+              position: fixed;
+              right: 0;
+              bottom: -15px;
+              left: 0;
+              z-index: $zindex-fixed;
+            }
+        </style>
         <title>{% block title %}Home{% endblock %}</title>
     </head>
     <body>

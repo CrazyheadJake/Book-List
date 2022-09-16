@@ -29,6 +29,6 @@ class User(db.Document, UserMixin):
     email = db.StringField(max_length=150)
     password = db.StringField(max_length=150)
     first_name = db.StringField(max_length=150)
-    # notes = db.relationship("Note")
     entries = db.ListField(db.Document())
+    sorting_method = db.StringField(max_length=150)
 

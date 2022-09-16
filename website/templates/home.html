@@ -235,29 +235,34 @@
 <div class="fixed-bottom">
     <div class="container-fluid bg-dark" align="center">
         <div class="row">
-            <div class="col-4">
+            <div class="col-5">
                 <form method="POST">
                     <div class="form-row">
                     <div class="form-group">
-                        <select id="sorting" name="sorting" class="form-control-sm mx-1 my-1" required="required">
+                        <select id="sorting" name="sorting" class="form-control-sm mr-1 my-1" required>
+                        <option selected disabled hidden >Sort by...</option>
                         <option>Date</option>
                         <option>Rating</option>
+                        <option>Author</option>
+                        <option>Series</option>
+                        <option>Title</option>
                         </select>
-                        </div>
-                    <div class=form-control-sm>    
-                    <button type="submit" class="btn btn-success my-1 mx-1 btn-sm">Apply</button>
+
+                    </div>
+                    <div class="form-control-sm">
+                    <button type="submit" class="btn btn-success btn-sm">Apply</button>
                     </div>
                     </div>
                 </form>
             </div>
-            <div class="col-4" align="center">
-                <button type="button" class="btn btn-primary my-1 mr-5 btn-sm" data-toggle="modal" data-target="#bookEntry">
-                Add a new book entry
+            <div class="col-4" align="left">
+                <button type="button" class="btn btn-primary my-1 btn-sm" data-toggle="modal" data-target="#bookEntry">
+                New Entry
                 </button>
             </div>
-            <div class="col-4" align="right">
-                <button type="button" class="btn btn-secondary my-1 ml-5 btn-sm" data-toggle="modal" data-target="#singleLineEntry">
-                Single line book entry
+            <div class="col-3" align="right">
+                <button type="button" class="btn btn-secondary my-1 btn-sm" data-toggle="modal" data-target="#singleLineEntry">
+                Line Entry
                 </button>
             </div>
         </div>
