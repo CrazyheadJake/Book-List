@@ -24,7 +24,7 @@ def get_cover(title, author):
         "hl": "en",  # language of the search
         "gl": "us",  # country where search comes from
         "ijn": "0",  # page number
-        "api_key": 'e53254545facf81fe1b059c3b62d0b9027a04ff39a251e8df91dfee16281c193'
+        "api_key": '636c93a4deb1fc7a0f1f9edb0cc185a3d3dfd38de5d12678aace2a143f27c105'
     }
 
     search = GoogleSearch(params)
